@@ -440,12 +440,14 @@
   // Set default to current time rounded UP to nearest 15 min
   setNow();
 
-  // Blur: round UP to nearest 15 min
-  input.addEventListener('blur', () => {
+  // Zaokrouhli nahoru ihned při změně (change i blur jako záloha)
+  function snapTo15() {
     if (!input.value) return;
     const [h, m] = input.value.split(':').map(Number);
     input.value = roundUpTo15(h, m);
-  });
+  }
+  input.addEventListener('change', snapTo15);
+  input.addEventListener('blur', snapTo15);
 
   function toMinutes(timeStr) {
     const [h, m] = timeStr.split(':').map(Number);
