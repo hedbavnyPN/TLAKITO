@@ -220,10 +220,6 @@
       background: #f0fdf4;
     }
 
-    .measurement-card.past {
-      border-left-color: #d1d5db;
-      background: #fff;
-    }
 
     .measurement-card.future {
       border-left-color: #d1d5db;
@@ -247,7 +243,6 @@
       flex: 1;
     }
 
-    .measurement-card.past .meas-time { color: #1a2332; }
 
     .meas-info {
       text-align: right;
@@ -364,7 +359,6 @@
         break-inside: avoid;
       }
 
-      .measurement-card.past { opacity: 1; }
 
       .measurement-card.current {
         background: #f0fdf4 !important;
@@ -572,31 +566,17 @@
     const list = document.getElementById('measurementList');
     list.innerHTML = '';
 
-    let nextFound = false;
-
     times.forEach((absMin, i) => {
       const timeStr = formatTime(absMin);
       const tNorm = ((absMin % 1440) + 1440) % 1440;
       const crossDay = absMin >= 1440;
 
-      let status = 'future';
-      if (i === currentIndex) status = 'current';
-      else if (currentIndex !== -1 && i < currentIndex) status = 'past';
-
-      const isNext = status === 'future' && !nextFound && currentIndex !== -1;
-      if (isNext) nextFound = true;
+      const isCurrent = i === currentIndex;
 
       const card = document.createElement('div');
-      card.className = `measurement-card ${status}`;
+      card.className = `measurement-card${isCurrent ? ' current' : ''}`;
 
-      let badgeHtml = '';
-      if (status === 'current') {
-        badgeHtml = `<span class="meas-badge badge-current">Právě teď</span>`;
-      } else if (status === 'past') {
-        badgeHtml = `<span class="meas-badge badge-past">Proběhlo k dnešnímu dni</span>`;
-      } else if (isNext) {
-        badgeHtml = `<span class="meas-badge badge-next">Příští</span>`;
-      }
+      const badgeHtml = isCurrent ? `<span class="meas-badge badge-current">Právě teď</span>` : '';
 
       const crossDayHtml = crossDay ? `<div class="crossday-note">+1 den</div>` : '';
 
