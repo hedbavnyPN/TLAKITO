@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>TLAKITO — Měření krevního tlaku</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a2332;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    header {
+      background: #1a56db;
+      color: #fff;
+      padding: 20px 16px 16px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    header p {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    input[type="time"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a2332;
+      border: 2px solid #d1d5db;
+      border-radius: 10px;
+      background: #f9fafb;
+      text-align: center;
+      letter-spacing: 0.05em;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="time"]:focus {
+      outline: none;
+      border-color: #1a56db;
+      background: #eff6ff;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      min-height: 56px;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active { opacity: 0.8; }
+
+    .btn-primary {
+      background: #1a56db;
+      color: #fff;
+      margin-top: 16px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+      flex: 1;
+    }
+
+    .btn-print {
+      background: #e5e7eb;
+      color: #374151;
+      flex: 1;
+    }
+
+    .results-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 24px 0 10px;
+    }
+
+    .measurement-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      border-left: 4px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .measurement-card.current {
+      border-left-color: #16a34a;
+      background: #f0fdf4;
+    }
+
+    .measurement-card.past {
+      border-left-color: #9ca3af;
+      background: #f9fafb;
+      opacity: 0.75;
+    }
+
+    .measurement-card.future {
+      border-left-color: #d1d5db;
+    }
+
+    .meas-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: #9ca3af;
+      min-width: 26px;
+      text-align: center;
+    }
+
+    .measurement-card.current .meas-num { color: #16a34a; }
+
+    .meas-time {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1a2332;
+      letter-spacing: 0.02em;
+      flex: 1;
+    }
+
+    .measurement-card.past .meas-time { color: #9ca3af; }
+
+    .meas-info {
+      text-align: right;
+    }
+
+    .meas-desc {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .meas-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+
+    .badge-current {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .badge-past {
+      background: #f3f4f6;
+      color: #9ca3af;
+    }
+
+    .badge-next {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .crossday-note {
+      font-size: 11px;
+      color: #d97706;
+      font-weight: 600;
+    }
+
+    #results { display: none; }
+
+    @media print {
+      body { background: #fff; }
+      header { background: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      .container { padding: 0; }
+      #results { display: block !important; }
+      .measurement-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #d1d5db;
+      }
+      .measurement-card.current {
+        background: #f0fdf4 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>TLAKITO</h1>
+  <p>Výpočet 10 měření krevního tlaku</p>
+</header>
+
+<div class="container">
+  <div class="card no-print">
+    <label class="field-label" for="startTime">Čas prvního měření</label>
+    <input type="time" id="startTime" step="900">
+    <p class="hint">Krok 15 minut — zadaný čas bude automaticky zaokrouhlen</p>
+    <button class="btn btn-primary" onclick="calculate()">Vypočítat</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="reset()">Reset</button>
+      <button class="btn btn-print" onclick="window.print()">Tisknout</button>
+    </div>
+  </div>
+
+  <div id="results">
+    <p class="results-header no-print">Plán měření</p>
+    <div id="measurementList"></div>
+  </div>
+</div>
+
+<script>
+  const INTERVALS = [0, 30, 60, 90, 120, 180, 240, 300, 360, 420];
+
+  const DESCRIPTIONS = [
+    'Výchozí měření',
+    'každých 30 minut',
+    'každých 30 minut',
+    'každých 30 minut',
+    'každých 30 minut',
+    'každou hodinu',
+    'každou hodinu',
+    'každé 2 hodiny',
+    'každé 2 hodiny',
+    'každé 2 hodiny',
+  ];
+
+  const input = document.getElementById('startTime');
+
+  // Set default to current time rounded to nearest 15 min
+  (function setDefaultTime() {
+    const now = new Date();
+    const m = Math.round(now.getMinutes() / 15) * 15;
+    const finalM = m % 60;
+    const finalH = m === 60 ? (now.getHours() + 1) % 24 : now.getHours();
+    input.value = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
+  })();
+
+  // Blur: round to nearest 15 min
+  input.addEventListener('blur', () => {
+    if (!input.value) return;
+    const [h, m] = input.value.split(':').map(Number);
+    const rounded = Math.round(m / 15) * 15;
+    const finalM = rounded % 60;
+    const finalH = rounded === 60 ? (h + 1) % 24 : h;
+    input.value = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
+  });
+
+  function toMinutes(timeStr) {
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  function formatTime(totalMinutes) {
+    const m = ((totalMinutes % 1440) + 1440) % 1440;
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+  }
+
+  function getCurrentMinutes() {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+
+  function calculate() {
+    if (!input.value) {
+      alert('Prosím zadejte čas prvního měření.');
+      return;
+    }
+
+    const baseMinutes = toMinutes(input.value);
+    const now = getCurrentMinutes();
+
+    // Build list of measurement times (in absolute minutes, may exceed 1440 for next-day)
+    const times = INTERVALS.map(offset => baseMinutes + offset);
+
+    // Determine current measurement index
+    // "Current" = the one whose window we're in (between this and next measurement)
+    let currentIndex = -1;
+    for (let i = 0; i < times.length; i++) {
+      const tNorm = ((times[i] % 1440) + 1440) % 1440;
+      const tNext = i < times.length - 1 ? ((times[i + 1] % 1440) + 1440) % 1440 : 1440;
+
+      // Handle midnight crossing: if tNext < tNorm, measurement spans midnight
+      let inWindow;
+      if (tNext >= tNorm) {
+        inWindow = now >= tNorm && now < tNext;
+      } else {
+        // spans midnight
+        inWindow = now >= tNorm || now < tNext;
+      }
+
+      if (inWindow) {
+        currentIndex = i;
+        break;
+      }
+    }
+
+    // If all measurements are in the past (last one passed), mark last as current
+    // If none found (all future), mark none
+    if (currentIndex === -1) {
+      const lastNorm = ((times[times.length - 1] % 1440) + 1440) % 1440;
+      if (now >= lastNorm) currentIndex = times.length - 1;
+    }
+
+    const list = document.getElementById('measurementList');
+    list.innerHTML = '';
+
+    let nextFound = false;
+
+    times.forEach((absMin, i) => {
+      const timeStr = formatTime(absMin);
+      const tNorm = ((absMin % 1440) + 1440) % 1440;
+      const crossDay = absMin >= 1440;
+
+      let status = 'future';
+      if (i === currentIndex) status = 'current';
+      else if (currentIndex !== -1 && i < currentIndex) status = 'past';
+
+      const isNext = status === 'future' && !nextFound && currentIndex !== -1;
+      if (isNext) nextFound = true;
+
+      const card = document.createElement('div');
+      card.className = `measurement-card ${status}`;
+
+      let badgeHtml = '';
+      if (status === 'current') {
+        badgeHtml = `<span class="meas-badge badge-current">Právě teď</span>`;
+      } else if (status === 'past') {
+        badgeHtml = `<span class="meas-badge badge-past">Proběhlo</span>`;
+      } else if (isNext) {
+        badgeHtml = `<span class="meas-badge badge-next">Příští</span>`;
+      }
+
+      const crossDayHtml = crossDay ? `<div class="crossday-note">+1 den</div>` : '';
+
+      card.innerHTML = `
+        <div class="meas-num">${i + 1}.</div>
+        <div class="meas-time">${timeStr}</div>
+        <div class="meas-info">
+          <div class="meas-desc">${DESCRIPTIONS[i]}</div>
+          ${badgeHtml}
+          ${crossDayHtml}
+        </div>
+      `;
+
+      list.appendChild(card);
+    });
+
+    document.getElementById('results').style.display = 'block';
+    // Scroll to results smoothly
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function reset() {
+    const now = new Date();
+    const m = Math.round(now.getMinutes() / 15) * 15;
+    const finalM = m % 60;
+    const finalH = m === 60 ? (now.getHours() + 1) % 24 : now.getHours();
+    input.value = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('measurementList').innerHTML = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
