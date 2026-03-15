@@ -225,6 +225,8 @@
     }
 
     #results { display: none; }
+    .print-header, .print-footer { display: none; }
+    .no-screen { display: none; }
 
     @media print {
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -247,11 +249,29 @@
         display: block;
       }
 
+      .print-header, .print-footer { display: flex !important; }
+
       .print-header {
         display: block !important;
         border-bottom: 2px solid #000;
         padding-bottom: 10px;
         margin-bottom: 16px;
+      }
+
+      .no-screen {
+        display: flex !important;
+        align-items: center;
+      }
+
+      .meas-check {
+        cursor: default;
+      }
+
+      .meas-check input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: #16a34a;
       }
 
       .print-header h2 {
@@ -362,14 +382,14 @@
   <div id="results">
     <p class="results-header no-print">Plán měření</p>
 
-    <div class="print-header" style="display:none">
+    <div class="print-header">
       <h2>Plán měření krevního tlaku</h2>
       <p id="printMeta"></p>
     </div>
 
     <div id="measurementList"></div>
 
-    <div class="print-footer" style="display:none">
+    <div class="print-footer">
       <div class="print-footer-item">
         <div class="print-footer-line"></div>
         Jméno pacienta
@@ -517,6 +537,7 @@
       const crossDayHtml = crossDay ? `<div class="crossday-note">+1 den</div>` : '';
 
       card.innerHTML = `
+        <label class="meas-check no-screen"><input type="checkbox"><span class="checkmark"></span></label>
         <div class="meas-num">${i + 1}.</div>
         <div class="meas-time">${timeStr}</div>
         <div class="meas-info">
