@@ -83,6 +83,25 @@
       margin-top: 6px;
     }
 
+    .snap-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #374151;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .snap-label input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: #1a56db;
+      flex-shrink: 0;
+    }
+
     .btn {
       display: block;
       width: 100%;
@@ -372,6 +391,10 @@
   <div class="card no-print">
     <label class="field-label" for="startTime">Čas prvního měření</label>
     <input type="time" id="startTime" step="900">
+    <label class="snap-label">
+      <input type="checkbox" id="snapCheck" checked>
+      Zaokrouhlovat na čtvrthodiny
+    </label>
 <button class="btn btn-primary" onclick="calculate()">Vypočítat</button>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="reset()">Reset</button>
@@ -440,9 +463,10 @@
   // Set default to current time rounded UP to nearest 15 min
   setNow();
 
-  // Zaokrouhli nahoru ihned při změně (change i blur jako záloha)
+  // Zaokrouhli nahoru ihned při změně (jen pokud je checkbox zaškrtnutý)
   function snapTo15() {
     if (!input.value) return;
+    if (!document.getElementById('snapCheck').checked) return;
     const [h, m] = input.value.split(':').map(Number);
     input.value = roundUpTo15(h, m);
   }
