@@ -221,9 +221,8 @@
     }
 
     .measurement-card.past {
-      border-left-color: #9ca3af;
-      background: #f9fafb;
-      opacity: 0.75;
+      border-left-color: #d1d5db;
+      background: #fff;
     }
 
     .measurement-card.future {
@@ -248,7 +247,7 @@
       flex: 1;
     }
 
-    .measurement-card.past .meas-time { color: #9ca3af; }
+    .measurement-card.past .meas-time { color: #1a2332; }
 
     .meas-info {
       text-align: right;
@@ -594,7 +593,7 @@
       if (status === 'current') {
         badgeHtml = `<span class="meas-badge badge-current">Právě teď</span>`;
       } else if (status === 'past') {
-        badgeHtml = `<span class="meas-badge badge-past">Proběhlo</span>`;
+        badgeHtml = `<span class="meas-badge badge-past">Proběhlo k dnešnímu dni</span>`;
       } else if (isNext) {
         badgeHtml = `<span class="meas-badge badge-next">Příští</span>`;
       }
