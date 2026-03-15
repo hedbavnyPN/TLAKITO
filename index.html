@@ -83,6 +83,29 @@
       margin-top: 6px;
     }
 
+    .time-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .time-label-row .field-label {
+      margin-bottom: 0;
+    }
+
+    .btn-clock {
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-clock:active { opacity: 0.6; }
+
     .snap-label {
       display: flex;
       align-items: center;
@@ -389,7 +412,10 @@
 
 <div class="container">
   <div class="card no-print">
-    <label class="field-label" for="startTime">Čas prvního měření</label>
+    <div class="time-label-row">
+      <label class="field-label" for="startTime">Čas prvního měření</label>
+      <button class="btn-clock" onclick="setNow()" title="Nastavit aktuální čas">🕐</button>
+    </div>
     <input type="time" id="startTime" step="900">
     <label class="snap-label">
       <input type="checkbox" id="snapCheck" checked>
