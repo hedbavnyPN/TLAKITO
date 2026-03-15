@@ -559,18 +559,17 @@
     const nowNorm = diff > 720 ? nowAbs + 1440 : nowAbs;
 
     // "Právě teď" = okno [times[i], times[i+1])
+    // Poslední měření nemá okno — pokud now nespadá nikam, žádné Právě teď
     let currentIndex = -1;
-    for (let i = 0; i < times.length; i++) {
-      const tStart = times[i];
-      const tEnd = i < times.length - 1 ? times[i + 1] : times[i] + 1440;
-      if (nowNorm >= tStart && nowNorm < tEnd) {
+    for (let i = 0; i < times.length - 1; i++) {
+      if (nowNorm >= times[i] && nowNorm < times[i + 1]) {
         currentIndex = i;
         break;
       }
     }
-
-    // Pokud jsou všechna měření v minulosti
-    if (currentIndex === -1 && nowNorm >= times[times.length - 1]) {
+    // Poslední měření: přesná shoda nebo v okně do +30 min (přirozený konec protokolu)
+    const last = times[times.length - 1];
+    if (currentIndex === -1 && nowNorm >= last && nowNorm < last + 30) {
       currentIndex = times.length - 1;
     }
 
