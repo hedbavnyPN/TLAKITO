@@ -227,20 +227,116 @@
     #results { display: none; }
 
     @media print {
-      body { background: #fff; }
-      header { background: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      body { background: #fff; font-family: Georgia, serif; }
+
+      header { display: none; }
+
       .no-print { display: none !important; }
-      .container { padding: 0; }
+
+      .container { padding: 0; max-width: 100%; }
+
       #results { display: block !important; }
-      .measurement-card {
-        break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #d1d5db;
+
+      .results-header { display: none; }
+
+      /* Tiskový hlavičkový blok */
+      #results::before {
+        content: '';
+        display: block;
       }
+
+      .print-header {
+        display: block !important;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+        margin-bottom: 16px;
+      }
+
+      .print-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 4px;
+      }
+
+      .print-header p {
+        font-size: 12px;
+        color: #555;
+        margin: 0;
+      }
+
+      /* Měření jako kompaktní řádky tabulky */
+      .measurement-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 4px;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        border-bottom: 1px solid #e5e7eb;
+        break-inside: avoid;
+      }
+
+      .measurement-card.past { opacity: 1; }
+
       .measurement-card.current {
         background: #f0fdf4 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        border-left: 4px solid #16a34a !important;
+        padding-left: 8px;
+      }
+
+      .meas-num {
+        font-size: 12px;
+        color: #555;
+        min-width: 22px;
+      }
+
+      .meas-time {
+        font-size: 22px;
+        font-weight: 800;
+        color: #000;
+        flex: 0 0 auto;
+        min-width: 80px;
+      }
+
+      .meas-info { text-align: left; flex: 1; }
+
+      .meas-desc {
+        font-size: 12px;
+        color: #555;
+      }
+
+      .meas-badge { display: none; }
+
+      .crossday-note {
+        font-size: 11px;
+        color: #555;
+        font-weight: 600;
+      }
+
+      /* Podpisový řádek */
+      .print-footer {
+        display: block !important;
+        margin-top: 24px;
+        border-top: 1px solid #d1d5db;
+        padding-top: 12px;
+        display: flex;
+        gap: 32px;
+      }
+
+      .print-footer-item {
+        flex: 1;
+        font-size: 11px;
+        color: #555;
+      }
+
+      .print-footer-line {
+        border-bottom: 1px solid #000;
+        height: 28px;
+        margin-bottom: 4px;
       }
     }
   </style>
@@ -256,8 +352,7 @@
   <div class="card no-print">
     <label class="field-label" for="startTime">Čas prvního měření</label>
     <input type="time" id="startTime" step="900">
-    <button class="btn btn-now" onclick="setNow()">Použít aktuální čas</button>
-    <button class="btn btn-primary" onclick="calculate()">Vypočítat</button>
+<button class="btn btn-primary" onclick="calculate()">Vypočítat</button>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="reset()">Reset</button>
       <button class="btn btn-print" onclick="window.print()">Tisknout</button>
@@ -266,7 +361,28 @@
 
   <div id="results">
     <p class="results-header no-print">Plán měření</p>
+
+    <div class="print-header" style="display:none">
+      <h2>Plán měření krevního tlaku</h2>
+      <p id="printMeta"></p>
+    </div>
+
     <div id="measurementList"></div>
+
+    <div class="print-footer" style="display:none">
+      <div class="print-footer-item">
+        <div class="print-footer-line"></div>
+        Jméno pacienta
+      </div>
+      <div class="print-footer-item">
+        <div class="print-footer-line"></div>
+        Podpis sestry
+      </div>
+      <div class="print-footer-item">
+        <div class="print-footer-line"></div>
+        Datum
+      </div>
+    </div>
   </div>
 </div>
 
@@ -412,6 +528,10 @@
 
       list.appendChild(card);
     });
+
+    // Tiskový meta řádek
+    const today = new Date().toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    document.getElementById('printMeta').textContent = `Výchozí čas: ${input.value}  ·  Vytištěno: ${today}`;
 
     document.getElementById('results').style.display = 'block';
     // Scroll to results smoothly
