@@ -122,6 +122,13 @@
       flex: 1;
     }
 
+    .btn-now {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 2px solid #bfdbfe;
+      margin-top: 10px;
+    }
+
     .results-header {
       font-size: 14px;
       font-weight: 600;
@@ -249,7 +256,7 @@
   <div class="card no-print">
     <label class="field-label" for="startTime">Čas prvního měření</label>
     <input type="time" id="startTime" step="900">
-    <p class="hint">Krok 15 minut — zadaný čas bude automaticky zaokrouhlen</p>
+    <button class="btn btn-now" onclick="setNow()">Použít aktuální čas</button>
     <button class="btn btn-primary" onclick="calculate()">Vypočítat</button>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="reset()">Reset</button>
@@ -281,23 +288,27 @@
 
   const input = document.getElementById('startTime');
 
-  // Set default to current time rounded to nearest 15 min
-  (function setDefaultTime() {
-    const now = new Date();
-    const m = Math.round(now.getMinutes() / 15) * 15;
-    const finalM = m % 60;
-    const finalH = m === 60 ? (now.getHours() + 1) % 24 : now.getHours();
-    input.value = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
-  })();
+  function roundUpTo15(h, m) {
+    const totalMin = h * 60 + m;
+    const rounded = Math.ceil(totalMin / 15) * 15;
+    const finalH = Math.floor(rounded / 60) % 24;
+    const finalM = rounded % 60;
+    return `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
+  }
 
-  // Blur: round to nearest 15 min
+  function setNow() {
+    const now = new Date();
+    input.value = roundUpTo15(now.getHours(), now.getMinutes());
+  }
+
+  // Set default to current time rounded UP to nearest 15 min
+  setNow();
+
+  // Blur: round UP to nearest 15 min
   input.addEventListener('blur', () => {
     if (!input.value) return;
     const [h, m] = input.value.split(':').map(Number);
-    const rounded = Math.round(m / 15) * 15;
-    const finalM = rounded % 60;
-    const finalH = rounded === 60 ? (h + 1) % 24 : h;
-    input.value = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
+    input.value = roundUpTo15(h, m);
   });
 
   function toMinutes(timeStr) {
