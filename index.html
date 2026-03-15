@@ -20,6 +20,29 @@
       padding: 16px;
     }
 
+    @media (min-width: 768px) {
+      body { background: #e8edf3; }
+
+      .container {
+        max-width: 960px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+        padding: 24px;
+      }
+
+      #results {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .card.no-print {
+        grid-column: 1;
+        grid-row: 1;
+      }
+    }
+
     header {
       background: #1a56db;
       color: #fff;
