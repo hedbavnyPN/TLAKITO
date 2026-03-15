@@ -548,9 +548,11 @@
     // Absolutní minuty od půlnoci (mohou přesáhnout 1440 pro příští den)
     const times = INTERVALS.map(offset => baseMinutes + offset);
 
-    // Převedeme "teď" do stejného absolutního prostoru jako times:
-    // pokud base > now, sestra zadala čas v budoucnu → now je vlastně "zítra"
-    const nowNorm = nowAbs < baseMinutes ? nowAbs + 1440 : nowAbs;
+    // Převedeme "teď" do stejného absolutního prostoru jako times.
+    // Přičteme 1440 jen pokud je rozdíl větší než 12 hodin (720 min) —
+    // tzn. sestra zadala čas který je opravdu "dnes v noci" a teď je ráno.
+    const diff = baseMinutes - nowAbs;
+    const nowNorm = diff > 720 ? nowAbs + 1440 : nowAbs;
 
     // "Právě teď" = okno [times[i], times[i+1])
     let currentIndex = -1;
