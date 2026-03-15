@@ -375,7 +375,7 @@
 <button class="btn btn-primary" onclick="calculate()">Vypočítat</button>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="reset()">Reset</button>
-      <button class="btn btn-print" onclick="window.print()">Tisknout</button>
+      <button class="btn btn-print" id="btnPrint" onclick="window.print()" style="display:none">Tisknout</button>
     </div>
   </div>
 
@@ -554,6 +554,7 @@
     const today = new Date().toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
     document.getElementById('printMeta').textContent = `Výchozí čas: ${input.value}  ·  Vytištěno: ${today}`;
 
+    document.getElementById('btnPrint').style.display = '';
     document.getElementById('results').style.display = 'block';
     // Scroll to results smoothly
     document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -565,6 +566,7 @@
     const finalM = m % 60;
     const finalH = m === 60 ? (now.getHours() + 1) % 24 : now.getHours();
     input.value = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
+    document.getElementById('btnPrint').style.display = 'none';
     document.getElementById('results').style.display = 'none';
     document.getElementById('measurementList').innerHTML = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
