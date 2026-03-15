@@ -543,38 +543,29 @@
     }
 
     const baseMinutes = toMinutes(input.value);
-    const now = getCurrentMinutes();
+    const nowAbs = getCurrentMinutes(); // minuty od půlnoci, 0–1439
 
-    // Build list of measurement times (in absolute minutes, may exceed 1440 for next-day)
+    // Absolutní minuty od půlnoci (mohou přesáhnout 1440 pro příští den)
     const times = INTERVALS.map(offset => baseMinutes + offset);
 
-    // Determine current measurement index
-    // "Current" = the one whose window we're in (between this and next measurement)
+    // Převedeme "teď" do stejného absolutního prostoru jako times:
+    // pokud base > now, sestra zadala čas v budoucnu → now je vlastně "zítra"
+    const nowNorm = nowAbs < baseMinutes ? nowAbs + 1440 : nowAbs;
+
+    // "Právě teď" = okno [times[i], times[i+1])
     let currentIndex = -1;
     for (let i = 0; i < times.length; i++) {
-      const tNorm = ((times[i] % 1440) + 1440) % 1440;
-      const tNext = i < times.length - 1 ? ((times[i + 1] % 1440) + 1440) % 1440 : 1440;
-
-      // Handle midnight crossing: if tNext < tNorm, measurement spans midnight
-      let inWindow;
-      if (tNext >= tNorm) {
-        inWindow = now >= tNorm && now < tNext;
-      } else {
-        // spans midnight
-        inWindow = now >= tNorm || now < tNext;
-      }
-
-      if (inWindow) {
+      const tStart = times[i];
+      const tEnd = i < times.length - 1 ? times[i + 1] : times[i] + 1440;
+      if (nowNorm >= tStart && nowNorm < tEnd) {
         currentIndex = i;
         break;
       }
     }
 
-    // If all measurements are in the past (last one passed), mark last as current
-    // If none found (all future), mark none
-    if (currentIndex === -1) {
-      const lastNorm = ((times[times.length - 1] % 1440) + 1440) % 1440;
-      if (now >= lastNorm) currentIndex = times.length - 1;
+    // Pokud jsou všechna měření v minulosti
+    if (currentIndex === -1 && nowNorm >= times[times.length - 1]) {
+      currentIndex = times.length - 1;
     }
 
     const list = document.getElementById('measurementList');
